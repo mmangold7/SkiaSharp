@@ -31,11 +31,11 @@ export class SizeWatcher {
             }
         });
     }
-    static invoke(element) {
+    static async invoke(element) {
         const watcherElement = element;
         const instance = watcherElement.SizeWatcher;
         if (!instance || !instance.callback)
             return;
-        return instance.callback.invokeMethod('Invoke', element.clientWidth, element.clientHeight);
+        await instance.callback.invokeMethodAsync('Invoke', element.clientWidth, element.clientHeight);
     }
 }

@@ -56,13 +56,13 @@ export class SizeWatcher {
 		});
 	}
 
-	static invoke(element: Element) {
+	static async invoke(element: Element) {
 		const watcherElement = element as SizeWatcherElement;
 		const instance = watcherElement.SizeWatcher;
 
 		if (!instance || !instance.callback)
 			return;
 
-		return instance.callback.invokeMethod('Invoke', element.clientWidth, element.clientHeight);
+		await instance.callback.invokeMethodAsync('Invoke', element.clientWidth, element.clientHeight);
 	}
 }

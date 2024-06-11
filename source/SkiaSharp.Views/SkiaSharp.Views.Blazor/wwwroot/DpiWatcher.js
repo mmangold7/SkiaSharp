@@ -14,14 +14,14 @@ export class DpiWatcher {
         window.clearInterval(DpiWatcher.timerId);
         DpiWatcher.callback = undefined;
     }
-    static update() {
+    static async update() {
         if (!DpiWatcher.callback)
             return;
         const currentDpi = window.devicePixelRatio;
         const lastDpi = DpiWatcher.lastDpi;
         DpiWatcher.lastDpi = currentDpi;
         if (Math.abs(lastDpi - currentDpi) > 0.001) {
-            DpiWatcher.callback.invokeMethod('Invoke', lastDpi, currentDpi);
+            await DpiWatcher.callback.invokeMethodAsync('Invoke', lastDpi, currentDpi);
         }
     }
 }
