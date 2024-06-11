@@ -73,11 +73,11 @@ export class SKHtmlCanvas {
             return;
         htmlCanvas.SKHtmlCanvas.setEnableRenderLoop(enable);
     }
-    static putImageData(element, pData, width, height) {
+    static putImageData(element, imageData, width, height) {
         const htmlCanvas = element;
         if (!htmlCanvas || !htmlCanvas.SKHtmlCanvas)
             return;
-        htmlCanvas.SKHtmlCanvas.putImageData(pData, width, height);
+        htmlCanvas.SKHtmlCanvas.putImageData(imageData, width, height);
     }
     deinit() {
         this.setEnableRenderLoop(false);
@@ -88,20 +88,22 @@ export class SKHtmlCanvas {
             this.setEnableRenderLoop(renderLoop);
         // make sure the canvas is scaled correctly for the drawing
         if (width && height) {
-            this.htmlCanvas.width = width;
-            this.htmlCanvas.height = height;
+            if (this.htmlCanvas.width !== width)
+                this.htmlCanvas.width = width;
+            if (this.htmlCanvas.height !== height)
+                this.htmlCanvas.height = height;
         }
         // skip because we have a render loop
         if (this.renderLoopRequest !== 0)
             return;
         // add the draw to the next frame
-        this.renderLoopRequest = window.requestAnimationFrame(() => {
+        this.renderLoopRequest = window.requestAnimationFrame(async () => {
             if (this.glInfo) {
                 // make current
                 const GL = SKHtmlCanvas.getGL();
                 GL.makeContextCurrent(this.glInfo.context);
             }
-            this.renderFrameCallback.invokeMethod('Invoke');
+            await this.renderFrameCallback.invokeMethodAsync('Invoke');
             this.renderLoopRequest = 0;
             // we may want to draw the next frame
             if (this.renderLoopEnabled)
@@ -120,8 +122,8 @@ export class SKHtmlCanvas {
             this.renderLoopRequest = 0;
         }
     }
-    putImageData(pData, width, height) {
-        if (this.glInfo || !pData || width <= 0 || width <= 0)
+    putImageData(imageData, width, height) {
+        if (this.glInfo || !imageData || width <= 0 || width <= 0)
             return false;
         var ctx = this.htmlCanvas.getContext('2d');
         if (!ctx) {
@@ -129,12 +131,16 @@ export class SKHtmlCanvas {
             return false;
         }
         // make sure the canvas is scaled correctly for the drawing
-        this.htmlCanvas.width = width;
-        this.htmlCanvas.height = height;
+        if (this.htmlCanvas.width !== width) {
+            this.htmlCanvas.width = width;
+        }
+        if (this.htmlCanvas.height !== height) {
+            this.htmlCanvas.height = height;
+        }
         // set the canvas to be the bytes
-        var buffer = new Uint8ClampedArray(Module.HEAPU8.buffer, pData, width * height * 4);
-        var imageData = new ImageData(buffer, width, height);
-        ctx.putImageData(imageData, 0, 0);
+        var buffer = new Uint8ClampedArray(imageData.buffer, imageData.byteOffset, imageData.length);
+        var imageDataObject = new ImageData(buffer, width, height);
+        ctx.putImageData(imageDataObject, 0, 0);
         return true;
     }
     static createWebGLContext(htmlCanvas) {

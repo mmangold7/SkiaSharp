@@ -26,7 +26,7 @@ export class DpiWatcher {
 		DpiWatcher.callback = undefined;
 	}
 
-	static update() {
+	static async update() {
 		if (!DpiWatcher.callback)
 			return;
 
@@ -35,7 +35,7 @@ export class DpiWatcher {
 		DpiWatcher.lastDpi = currentDpi;
 
 		if (Math.abs(lastDpi - currentDpi) > 0.001) {
-			DpiWatcher.callback.invokeMethod('Invoke', lastDpi, currentDpi);
+			await DpiWatcher.callback.invokeMethodAsync('Invoke', lastDpi, currentDpi);
 		}
 	}
 }
